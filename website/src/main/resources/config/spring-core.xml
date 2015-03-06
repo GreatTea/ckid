@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+      http://www.springframework.org/schema/context
+      http://www.springframework.org/schema/context/spring-context.xsd
+      http://www.springframework.org/schema/aop
+      http://www.springframework.org/schema/aop/spring-aop-4.0.xsd
+      http://www.springframework.org/schema/tx
+      http://www.springframework.org/schema/tx/spring-tx-4.0.xsd">
+
+
+    <!-- 加载资源文件  其中包含变量信息，必须在Spring配置文件的最前面加载，即第一个加载-->
+    <context:property-placeholder location="classpath:config/jdbc.properties"/>
+
+    <context:annotation-config />
+
+    <bean id="messageSource" class="org.springframework.context.support.ResourceBundleMessageSource">
+        <property name="basename" value="config.global" />
+    </bean>
+
+    <!--
+    <aop:aspectj-autoproxy />-->
+
+    <!--
+    <context:component-scan core-package="com.yida">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Service" />
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Repository" />
+    </context:component-scan>
+
+    <bean name="hibernateProperties"
+          class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+        <property name="properties">
+            <props>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">true</prop>
+                <prop key="hibernate.transaction.factory_class">org.hibernate.transaction.CMTTransactionFactory</prop>
+                <prop key="hibernate.transaction.jta.platform">com.gtore.AtomikosJtaPlatform</prop>
+                <prop key="hibernate.current_session_context_class">jta</prop>
+                <prop key="hibernate.transaction.manager_lookup_class">com.atomikos.icatch.jta.hibernate3.TransactionManagerLookup</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="coreDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+                 init-method="init" destroy-method="close" lazy-init="true">
+        <property name="uniqueResourceName">
+            <value>coreDs</value>
+        </property>
+        <property name="xaDataSourceClassName" value="${jdbc.core.driverClassName}" />
+        <property name="xaProperties">
+            <props>
+                <prop key="user">${jdbc.core.username}</prop>
+                <prop key="password">${jdbc.core.password}</prop>
+                <prop key="URL">${jdbc.core.url}</prop>
+            </props>
+        </property>
+        <property name="poolSize" value="1"/>
+        <property name="maxPoolSize" value="10"/>
+    </bean>
+
+    <bean id="coreSessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="coreDataSource" />
+        <property name="hibernateProperties" ref="hibernateProperties" />
+        <property name="packagesToScan">
+            <list>
+                <value>com.gt.entity</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="blogDataSource" class="com.atomikos.jdbc.AtomikosDataSourceBean"
+          init-method="init" destroy-method="close" lazy-init="true">
+        <property name="uniqueResourceName">
+            <value>blogDs</value>
+        </property>
+        <property name="xaDataSourceClassName" value="${jdbc.blog.driverClassName}" />
+        <property name="xaProperties">
+            <props>
+                <prop key="user">${jdbc.blog.username}</prop>
+                <prop key="password">${jdbc.blog.password}</prop>
+                <prop key="URL">${jdbc.blog.url}</prop>
+            </props>
+        </property>
+        <property name="poolSize" value="1"/>
+        <property name="maxPoolSize" value="10"/>
+    </bean>
+
+    <bean id="blogSessionFactory"
+          class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="blogDataSource" />
+        <property name="hibernateProperties" ref="hibernateProperties" />
+        <property name="packagesToScan">
+            <list>
+                <value>com.gtore.blog.entity</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="atomikosUserTransaction" class="com.atomikos.icatch.jta.UserTransactionImp">
+        <property name="transactionTimeout" value="300" />
+    </bean>
+
+    <bean id="atomikosTransactionManager" class="com.atomikos.icatch.jta.UserTransactionManager"
+          init-method="init" destroy-method="close">
+        <property name="forceShutdown" value="true" />
+    </bean>
+
+    <bean id="transactionManager"
+          class="org.springframework.transaction.jta.JtaTransactionManager">
+        <property name="transactionManager" ref="atomikosTransactionManager" />
+        <property name="userTransaction" ref="atomikosUserTransaction" />
+        <property name="allowCustomIsolationLevels" value="true" />
+    </bean>
+
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    ->
+
+    <bean id="entityManagerFactory" class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="persistenceXmlLocation" value="classpath:META-INF/persistence.xml"/>
+        <property name="loadTimeWeaver">
+            <bean class="org.springframework.instrument.classloading.InstrumentationLoadTimeWeaver"/>
+        </property>
+    </bean>
+
+    <bean id="txManager" class="org.springframework.orm.jpa.JpaTransactionManager">
+        <property name="entityManagerFactory" ref="entityManagerFactory"/>
+    </bean>
+     -->
+
+    <!-- 数据库映射 -->
+    <!--  class="org.apache.tomcat.dbcp.dbcp.BasicDataSource" -->
+    <!--  class="org.springframework.jdbc.datasource.DriverManagerDataSource"
+    <bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.user}" />
+        <property name="password" value="${jdbc.pass}" />
+    </bean>
+    -->
+
+    <!-- 配置Hibernate事务管理器
+    <bean id="transactionManager"
+          class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory" />
+    </bean>
+    -->
+
+    <!-- 配置事务异常封装
+    <bean id="persistenceExceptionTranslationPostProcessor"
+          class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor" />
+    -->
+
+    <!--  声明式容器事务管理 ,transaction-manager指定事务管理器为transactionManager
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="add*" propagation="REQUIRED" />
+            <tx:method name="get*" propagation="REQUIRED" />
+            <tx:method name="*" read-only="true" />
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config expose-proxy="true">
+        <aop:pointcut id="txPointcut" expression="execution(* com.yida..*.service..*.*(..))" />
+        <aop:advisor pointcut-ref="txPointcut" advice-ref="txAdvice"/>
+    </aop:config>
+    -->
+
+    <aop:aspectj-autoproxy />
+
+    <context:component-scan base-package="com">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller" />
+    </context:component-scan>
+
+    <!-- jndi 数据源的配置
+    <bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean">
+        <property name="jndiName">
+            <value>${dataSourceJNDI}</value>
+        </property>
+    </bean>-->
+
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url}" />
+        <property name="username" value="${jdbc.username}" />
+        <property name="password" value="${jdbc.password}" />
+        <property name="filters" value="${filters}" />
+        <property name="maxActive" value="${maxActive}" />
+        <property name="initialSize" value="${initialSize}" />
+        <property name="maxWait" value="${maxWait}" />
+        <property name="minIdle" value="${minIdle}" />
+        <property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}" />
+        <property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}" />
+        <property name="validationQuery" value="${validationQuery}" />
+        <property name="testWhileIdle" value="${testWhileIdle}" />
+        <property name="testOnBorrow" value="${testOnBorrow}" />
+        <property name="testOnReturn" value="${testOnReturn}" />
+        <property name="maxOpenPreparedStatements" value="${maxOpenPreparedStatements}" />
+    </bean>
+
+    <!-- 配置数据源的会话工厂，这里使用注解会话工厂。 -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate4.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.SQLServerDialect</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.format_sql">false</prop>
+            </props>
+        </property>
+
+        <!-- 通过包扫描的方法找到映射实体 -->
+        <property name="packagesToScan">
+            <list>
+                <value>com.gt.**.entity</value>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="dataSource2" class="com.alibaba.druid.pool.DruidDataSource" destroy-method="close">
+        <property name="driverClassName" value="${jdbc.driverClassName}" />
+        <property name="url" value="${jdbc.url2}" />
+        <property name="username" value="${jdbc.username2}" />
+        <property name="password" value="${jdbc.password2}" />
+        <property name="filters" value="${filters}" />
+        <property name="maxActive" value="${maxActive}" />
+        <property name="initialSize" value="${initialSize}" />
+        <property name="maxWait" value="${maxWait}" />
+        <property name="minIdle" value="${minIdle}" />
+        <property name="timeBetweenEvictionRunsMillis" value="${timeBetweenEvictionRunsMillis}" />
+        <property name="minEvictableIdleTimeMillis" value="${minEvictableIdleTimeMillis}" />
+        <property name="validationQuery" value="${validationQuery}" />
+        <property name="testWhileIdle" value="${testWhileIdle}" />
+        <property name="testOnBorrow" value="${testOnBorrow}" />
+        <property name="testOnReturn" value="${testOnReturn}" />
+        <property name="maxOpenPreparedStatements" value="${maxOpenPreparedStatements}" />
+    </bean>
+
+    <!-- 配置事务管理 -->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate4.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- 声明可以使用注解配置事务管理 -->
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+</beans>
+
